@@ -24,38 +24,38 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 **Usuário de execução:** `node` (não-root, já vem pronto na imagem `node:alpine`)
 **Tamanho final da imagem:** ~58MB
 
-**Por que o multi-stage ajuda?** [Sua resposta em 1–2 frases — dica: pense em por que a imagem final não precisa do `npm` inteiro nem de cache de instalação, só do resultado.]
+**Por que o multi-stage ajuda?** Porque o estágio final só recebe o `node_modules` já pronto e o código-fonte — nada das ferramentas de build, cache do npm ou arquivos temporários do estágio `builder` vai parar na imagem final. Isso deixa a imagem menor (menos superfície de ataque, menos coisa pra escanear em busca de vulnerabilidade) e mais rápida de baixar/subir em produção.
 
 **Print 1** — `docker build` + `docker images`
-`![Build e tamanho da imagem](docs/imagens/01-build-images.png)`
+![Build e tamanho da imagem](docs/imagens/01-build-images.png)
 
 **Print 2** — aplicação rodando com tarefas cadastradas
-`![App rodando](docs/imagens/02-app-rodando.png)`
+![App rodando](docs/imagens/02-app-rodando.png)
 
 ## 3. Volumes e persistência
 
 **Volume usado:** `todo-db` → montado em `/etc/todos` (container avulso, Parte 2) — no Compose, o volume equivalente é `todo-mysql-data` → `/var/lib/mysql`
 
 **Print 3** — SEM volume: dados perdidos ao recriar o container
-`![Sem volume](docs/imagens/03-sem-volume.png)`
+![Sem volume](docs/imagens/03-sem-volume.png)
 
 **Print 4** — COM volume: dados preservados
-`![Com volume](docs/imagens/04-com-volume.png)`
+![Com volume](docs/imagens/04-com-volume.png)
 
-**Diferença entre `docker compose down` e `docker compose down -v`:** [Sua resposta em 1 frase]
+**Diferença entre `docker compose down` e `docker compose down -v`:** `down` para e remove os containers e a rede, mas mantém os volumes nomeados (os dados sobrevivem); `down -v` faz tudo isso **e também apaga os volumes**, perdendo os dados de vez.
 
 ## 4. Rede
 
 **Rede criada:** `todo-net` **Serviços conectados:** app e mysql/db
-**A porta do banco está exposta ao host?** Não — [justifique em 1 frase, ex.: só o app precisa falar com o banco; expor a porta ao host aumentaria a superfície de ataque sem necessidade]
+**A porta do banco está exposta ao host?** Não — só o `app` precisa conversar com o banco, e essa comunicação já acontece dentro da rede Docker (`todo-net`); publicar a porta 3306 no host abriria o MySQL pra qualquer coisa rodando na máquina (ou na rede, dependendo do firewall), sem necessidade nenhuma.
 
-**Por que o app consegue chamar o host `mysql`/`db` sem saber o IP?** [Sua resposta em 1 frase — dica: pense no que vimos na Aula 03 sobre resolução de nomes dentro de uma rede Docker]
+**Por que o app consegue chamar o host `mysql`/`db` sem saber o IP?** Porque containers na mesma rede Docker (definida pelo usuário, seja via `docker network create` ou automaticamente pelo Compose) resolvem uns aos outros pelo nome — o Docker mantém um DNS interno que traduz o nome do serviço/container pro IP real, então o app só precisa saber o nome (`mysql` ou `db`), nunca o IP.
 
 **Print 5** — `docker network inspect`
-`![Network inspect](docs/imagens/05-network-inspect.png)`
+![Network inspect](docs/imagens/05-network-inspect.png)
 
 **Print 6** — dados dentro do MySQL (`select * from todo_items;`)
-`![Select no MySQL](docs/imagens/06-mysql-select.png)`
+![Select no MySQL](docs/imagens/06-mysql-select.png)
 
 ## 5. Docker Compose
 
@@ -64,7 +64,7 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 **Variáveis sensíveis:** carregadas via `.env` (não versionado). Modelo em `.env.example`.
 
 **Print 7** — `docker compose ps`
-`![Compose ps](docs/imagens/07-compose-ps.png)`
+![Compose ps](docs/imagens/07-compose-ps.png)
 
 ## 6. Integração Contínua (GitHub Actions)
 
@@ -77,19 +77,19 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 5. Derruba a stack (`docker compose down -v`, sempre, mesmo se algo falhar)
 
 **Print 8** — execução verde ✅
-`![CI verde](docs/imagens/08-ci-verde.png)`
+![CI verde](docs/imagens/08-ci-verde.png)
 
 ## 7. Quebra proposital do CI
 
-**O que eu quebrei:** [descreva a alteração exata que você fez — ex.: trocar `node src/index.js` por `node src/indexx.js` no Dockerfile]
-**Erro que apareceu no log:** [cole a mensagem principal]
-**Como o CI reagiu:** [em qual step falhou e por quê]
-**Como eu corrigi:** [o que foi alterado]
+**O que eu quebrei:** troquei `CMD ["node", "src/index.js"]` por `CMD ["node", "src/indexx.js"]` no `Dockerfile` (arquivo que não existe).
+**Erro que apareceu no log:** `Error: Cannot find module '/app/src/indexx.js'`
+**Como o CI reagiu:** o job passou pelo build normalmente (o Docker não valida se o arquivo do `CMD` existe na hora de buildar), mas falhou no step **"Aguardar a aplicação responder"** — o container do `app` subia e morria na hora (`MODULE_NOT_FOUND`), então o `curl` nunca conseguia conectar em `http://localhost:3000/items`, e depois das 30 tentativas o step retornava `exit 1`.
+**Como eu corrigi:** voltei o `CMD` para o caminho certo (`src/index.js`), na mesma branch `quebra-proposital`, com um segundo commit.
 
-**Link do Pull Request:** [URL]
+**Link do Pull Request:** https://github.com/DilliKel/getting-started-docker/pull/1
 
 **Print 9** — execução vermelha ❌ + log do erro
-`![CI vermelho](docs/imagens/09-ci-vermelho.png)`
+![CI vermelho](docs/imagens/09-ci-vermelho.png)
 
 ## 8. Dificuldades e aprendizados
 
@@ -104,6 +104,6 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 - [x] Rede nomeada + banco não exposto ao host
 - [x] `compose.yaml` sobe tudo com um comando
 - [x] `.env` no `.gitignore` e `.env.example` versionado
-- [ ] CI verde (confirmar na aba Actions do GitHub após o push)
-- [ ] PR com CI vermelho documentado
-- [ ] Todos os 9 prints no README
+- [x] CI verde
+- [x] PR com CI vermelho documentado ([#1](https://github.com/DilliKel/getting-started-docker/pull/1), merged)
+- [ ] Todos os 9 prints no README — falta inserir os arquivos em `docs/imagens/` e conferir os `![...]` abaixo
