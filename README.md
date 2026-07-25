@@ -27,20 +27,20 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 **Por que o multi-stage ajuda?** Porque o estágio final só recebe o `node_modules` já pronto e o código-fonte — nada das ferramentas de build, cache do npm ou arquivos temporários do estágio `builder` vai parar na imagem final. Isso deixa a imagem menor (menos superfície de ataque, menos coisa pra escanear em busca de vulnerabilidade) e mais rápida de baixar/subir em produção.
 
 **Print 1** — `docker build` + `docker images`
-![Build e tamanho da imagem](docs/imagens/01-build-images.png)
+![Build e tamanho da imagem](docs/imagens/print1.png)
 
 **Print 2** — aplicação rodando com tarefas cadastradas
-![App rodando](docs/imagens/02-app-rodando.png)
+![App rodando](docs/imagens/print2.png)
 
 ## 3. Volumes e persistência
 
 **Volume usado:** `todo-db` → montado em `/etc/todos` (container avulso, Parte 2) — no Compose, o volume equivalente é `todo-mysql-data` → `/var/lib/mysql`
 
 **Print 3** — SEM volume: dados perdidos ao recriar o container
-![Sem volume](docs/imagens/03-sem-volume.png)
+![Sem volume](docs/imagens/print3.png)
 
 **Print 4** — COM volume: dados preservados
-![Com volume](docs/imagens/04-com-volume.png)
+![Com volume](docs/imagens/print4.png)
 
 **Diferença entre `docker compose down` e `docker compose down -v`:** `down` para e remove os containers e a rede, mas mantém os volumes nomeados (os dados sobrevivem); `down -v` faz tudo isso **e também apaga os volumes**, perdendo os dados de vez.
 
@@ -51,11 +51,12 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 
 **Por que o app consegue chamar o host `mysql`/`db` sem saber o IP?** Porque containers na mesma rede Docker (definida pelo usuário, seja via `docker network create` ou automaticamente pelo Compose) resolvem uns aos outros pelo nome — o Docker mantém um DNS interno que traduz o nome do serviço/container pro IP real, então o app só precisa saber o nome (`mysql` ou `db`), nunca o IP.
 
-**Print 5** — `docker network inspect`
-![Network inspect](docs/imagens/05-network-inspect.png)
+**Print 5** — `docker network inspect` (em duas partes, para caber tudo)
+![Network inspect - parte 1](docs/imagens/print5-1.png)
+![Network inspect - parte 2](docs/imagens/print5-2.png)
 
 **Print 6** — dados dentro do MySQL (`select * from todo_items;`)
-![Select no MySQL](docs/imagens/06-mysql-select.png)
+![Select no MySQL](docs/imagens/print6.png)
 
 ## 5. Docker Compose
 
@@ -64,7 +65,7 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 **Variáveis sensíveis:** carregadas via `.env` (não versionado). Modelo em `.env.example`.
 
 **Print 7** — `docker compose ps`
-![Compose ps](docs/imagens/07-compose-ps.png)
+![Compose ps](docs/imagens/print7.png)
 
 ## 6. Integração Contínua (GitHub Actions)
 
@@ -77,7 +78,7 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 5. Derruba a stack (`docker compose down -v`, sempre, mesmo se algo falhar)
 
 **Print 8** — execução verde ✅
-![CI verde](docs/imagens/08-ci-verde.png)
+![CI verde](docs/imagens/print8.png)
 
 ## 7. Quebra proposital do CI
 
@@ -89,7 +90,7 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 **Link do Pull Request:** https://github.com/DilliKel/getting-started-docker/pull/1
 
 **Print 9** — execução vermelha ❌ + log do erro
-![CI vermelho](docs/imagens/09-ci-vermelho.png)
+![CI vermelho](docs/imagens/print9.png)
 
 ## 8. Dificuldades e aprendizados
 
@@ -106,4 +107,4 @@ Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v`
 - [x] `.env` no `.gitignore` e `.env.example` versionado
 - [x] CI verde
 - [x] PR com CI vermelho documentado ([#1](https://github.com/DilliKel/getting-started-docker/pull/1), merged)
-- [ ] Todos os 9 prints no README — falta inserir os arquivos em `docs/imagens/` e conferir os `![...]` abaixo
+- [x] Todos os 9 prints no README
