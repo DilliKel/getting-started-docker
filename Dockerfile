@@ -5,6 +5,12 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# python3/make/g++: necessários para compilar o sqlite3 (dependência nativa)
+# via node-gyp, caso o binário pré-compilado não esteja disponível para essa
+# combinação de arquitetura/Node — sem isso, o build falha de forma
+# intermitente (funciona quando o binário pronto baixa, quebra quando não).
+RUN apk add --no-cache python3 make g++
+
 # Copia só os arquivos de dependência primeiro — o npm ci só reroda
 # quando package.json/package-lock.json mudam, não a cada mudança no código.
 COPY package.json package-lock.json ./
