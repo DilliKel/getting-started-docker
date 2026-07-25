@@ -106,7 +106,10 @@ Para derrubar a aplicação:
 
 ## 8. Dificuldades e aprendizados
 
-[3 a 5 linhas: o que travou, como resolveu, o que ficou mais claro sobre containers depois da atividade]
+- **Permissão negada rodando como não-root:** ao trocar pro usuário `node` no Dockerfile, o app quebrou com `EACCES` tentando criar `/etc/todos` (onde fica o banco SQLite). Entendi que rodar sem root é ótimo pra segurança, mas qualquer pasta que a aplicação precise escrever tem que já existir com o dono certo **antes** do `USER` trocar — resolvi criando a pasta e dando `chown` pro usuário `node` ainda como root, no próprio Dockerfile.
+- **Confundi container avulso com Compose:** no teste de volume, tentei `docker rm -f todo` e deu "no such container" — só depois percebi que o que estava rodando era a stack do Compose (`meu-projeto-docker-app-1`), não o container `todo` que eu tinha criado antes. Aprendi na prática que container avulso (`docker run`) e serviço do Compose são coisas diferentes, mesmo rodando a mesma imagem.
+- **Dado "fantasma" no teste de volume:** ao testar a persistência, apareceu uma tarefa que eu não tinha cadastrado — era sobra de um teste anterior no mesmo volume nomeado (`todo-db`). Voltou a mostrar que volume nomeado realmente **não** é apagado sozinho — se reaproveitar o mesmo nome, o dado antigo continua lá, então pra um teste limpo é preciso remover o volume explicitamente.
+- **CI quebrou sem eu mexer no código:** depois de só adicionar os prints (imagens) e dar push, o pipeline falhou no build da imagem — parecia não ter relação nenhuma com o que eu tinha mudado. Fui olhar o log e o problema era o `sqlite3` (dependência nativa) tentando compilar do zero por falta do Python no estágio de build, algo que só acontece quando o binário pré-compilado não baixa. Foi a maior lição da atividade: o CI pega até os erros que "não deveriam" acontecer, e o log é sempre o primeiro lugar pra olhar antes de suspeitar do que você mudou por último.
 
 ## 9. Checklist de autoavaliação
 
