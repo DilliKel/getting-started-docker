@@ -1,8 +1,8 @@
-# Atividade Docker + CI — [SEU NOME]
+# Atividade Docker + CI — Kelvin Araújo Ferreira
 
-> Preencha os campos `[...]` restantes e substitua os placeholders de print pelos seus, salvos em `docs/imagens/`.
+> Preencha os placeholders de print restantes, salvos em `docs/imagens/`.
 
-**Aluno(a):** [nome completo] **Turma:** [turma] **Data:** [data] **Aplicação usada:** docker/getting-started-app — To-Do em Node.js
+**Aluno(a):** Kelvin Araújo Ferreira **Turma:** Noturno **Data:** 24/07/2026 **Aplicação usada:** docker/getting-started-app — To-Do em Node.js
 
 ## 1. Como executar este projeto
 
