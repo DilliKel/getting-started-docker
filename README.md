@@ -6,16 +6,28 @@
 
 ## 1. Como executar este projeto
 
+**Pré-requisito:** ter o [Docker](https://docs.docker.com/get-docker/) instalado e rodando na máquina.
+
 ```bash
-git clone [URL do seu repositório]
-cd meu-projeto-docker
+git clone https://github.com/DilliKel/getting-started-docker.git
+cd getting-started-docker
 cp .env.example .env
 docker compose up -d --build
 ```
 
-Acesse: http://localhost:3000
+Isso builda a imagem da aplicação e sobe dois containers: o `app` (a aplicação To-Do) e o `db` (MySQL). Pode levar alguns segundos até o banco ficar pronto — dá pra acompanhar com `docker compose ps` (o `db` precisa aparecer como `healthy`).
 
-Para derrubar: `docker compose down` (mantém dados) ou `docker compose down -v` (apaga dados).
+Depois de subir, **abra o navegador** e acesse:
+
+```
+http://localhost:3000
+```
+
+Você vai ver a interface do To-Do app — dá pra cadastrar, marcar como concluída e excluir tarefas. Elas ficam salvas no banco MySQL, dentro do volume `todo-mysql-data`.
+
+Para derrubar a aplicação:
+- `docker compose down` — para e remove os containers, **mantém** os dados (o volume continua existindo)
+- `docker compose down -v` — para tudo **e apaga** os dados (remove o volume também)
 
 ## 2. Imagem e Dockerfile multi-stage
 
