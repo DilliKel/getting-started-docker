@@ -1,6 +1,6 @@
 # Atividade Docker + CI — Kelvin Araújo Ferreira
 
-> Preencha os placeholders de print restantes, salvos em `docs/imagens/`.
+Atividade prática do **Módulo 11 — DevOps e Cloud Computing** (Capacitação em Desenvolvimento Full Stack, iTeam), sobre containerização, orquestração com Docker Compose e Integração Contínua. Enunciado completo, contexto do curso e anotações de aula em [`iteam-devops-modulo11/atividade-docker-ci`](https://github.com/DilliKel/iteam-devops-modulo11/tree/main/atividade-docker-ci) — o repositório de anotações do módulo.
 
 **Aluno(a):** Kelvin Araújo Ferreira **Turma:** Noturno **Data:** 24/07/2026 **Aplicação usada:** docker/getting-started-app — To-Do em Node.js
 
